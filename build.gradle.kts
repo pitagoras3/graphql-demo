@@ -18,7 +18,7 @@ repositories {
 val vertxVersion = "4.1.0"
 val junitJupiterVersion = "5.7.0"
 
-val mainVerticleName = "dev.marcinkiewicz.graphql_demo.MainVerticle"
+val mainVerticleName = "dev.marcinkiewicz.graphql.MainVerticle"
 val launcherClassName = "io.vertx.core.Launcher"
 
 val watchForChange = "src/**/*"

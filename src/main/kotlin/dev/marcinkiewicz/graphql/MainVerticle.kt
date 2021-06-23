@@ -1,4 +1,4 @@
-package dev.marcinkiewicz.graphql_demo
+package dev.marcinkiewicz.graphql
 
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Promise

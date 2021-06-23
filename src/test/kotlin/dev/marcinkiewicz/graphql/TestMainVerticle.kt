@@ -1,4 +1,4 @@
-package dev.marcinkiewicz.graphql_demo
+package dev.marcinkiewicz.graphql
 
 import io.vertx.core.Vertx
 import io.vertx.junit5.VertxExtension
