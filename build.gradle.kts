@@ -37,6 +37,8 @@ dependencies {
   runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.65.Final:osx-x86_64")
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+  testImplementation("io.reactiverse:reactiverse-junit5-web-client:0.3.0")
+  testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.24")
 }
 
 val compileKotlin: KotlinCompile by tasks
