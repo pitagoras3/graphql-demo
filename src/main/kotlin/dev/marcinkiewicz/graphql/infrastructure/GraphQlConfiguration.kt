@@ -1,7 +1,7 @@
 package dev.marcinkiewicz.graphql.infrastructure
 
-import dev.marcinkiewicz.graphql.task.Task
-import dev.marcinkiewicz.graphql.task.mockedTasks
+import dev.marcinkiewicz.graphql.core.task.Task
+import dev.marcinkiewicz.graphql.core.task.mockedTasks
 import graphql.GraphQL
 import graphql.schema.DataFetchingEnvironment
 import graphql.schema.idl.RuntimeWiring

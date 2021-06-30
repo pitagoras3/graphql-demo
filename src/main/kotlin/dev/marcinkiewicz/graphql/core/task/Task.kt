@@ -1,4 +1,4 @@
-package dev.marcinkiewicz.graphql.task
+package dev.marcinkiewicz.graphql.core.task
 
 import java.util.*
 
