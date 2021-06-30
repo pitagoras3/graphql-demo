@@ -1,6 +1,7 @@
 package dev.marcinkiewicz.graphql
 
-import dev.marcinkiewicz.graphql.infrastructure.GraphQlConfiguration
+import dev.marcinkiewicz.graphql.core.task.TaskServiceImpl
+import dev.marcinkiewicz.graphql.infrastructure.graphql.GraphQlConfiguration
 import io.vertx.core.AbstractVerticle
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
@@ -13,7 +14,7 @@ class MainVerticle : AbstractVerticle() {
 
   override fun start() {
     val graphQlConfiguration = GraphQlConfiguration(vertx)
-    val graphQlHandler = GraphQLHandler.create(graphQlConfiguration.setupGraphQl())
+    val graphQlHandler = GraphQLHandler.create(graphQlConfiguration.setupGraphQl(TaskServiceImpl()))
     val graphiQLHandlerOptions: GraphiQLHandlerOptions = graphiQLHandlerOptionsOf(
       enabled = true,
       graphQLUri = "/graphql"
