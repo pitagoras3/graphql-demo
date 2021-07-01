@@ -30,7 +30,7 @@ class TestMainVerticle {
   }
 
   @Test
-  fun `should return 3 tasks when starting application`(testContext: VertxTestContext, client: WebClient) {
+  fun `should return 10 tasks when starting application`(testContext: VertxTestContext, client: WebClient) {
     testRequest(client, HttpMethod.POST, "/graphql")
       .expect(
         statusCode(200), {
@@ -39,7 +39,7 @@ class TestMainVerticle {
               .getJsonObject("data")
               .getJsonArray("allTasks")
               .size()
-          ).isEqualTo(3)
+          ).isEqualTo(10)
         })
       .sendJson(JsonObject("""{"query":"query {allTasks{id,description,completed}}"}"""), testContext)
   }

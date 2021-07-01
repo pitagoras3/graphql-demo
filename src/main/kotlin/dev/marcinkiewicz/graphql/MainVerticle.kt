@@ -1,32 +1,35 @@
 package dev.marcinkiewicz.graphql
 
-import dev.marcinkiewicz.graphql.core.task.TaskServiceImpl
-import dev.marcinkiewicz.graphql.infrastructure.graphql.GraphQlConfiguration
+import dev.marcinkiewicz.graphql.tasks.adapters.api.TaskFacade
+import dev.marcinkiewicz.graphql.tasks.adapters.api.applicationRouter
+import dev.marcinkiewicz.graphql.tasks.adapters.taskdb.InMemoryTaskRepository
+import dev.marcinkiewicz.graphql.tasks.adapters.taskservice.TaskServiceImpl
+import dev.marcinkiewicz.graphql.tasks.config.graphql.GraphQlConfiguration.setupGraphQlSchemaAndWiring
 import io.vertx.core.AbstractVerticle
-import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.graphql.GraphQLHandler
 import io.vertx.ext.web.handler.graphql.GraphiQLHandler
-import io.vertx.ext.web.handler.graphql.GraphiQLHandlerOptions
 import io.vertx.kotlin.ext.web.handler.graphql.graphiQLHandlerOptionsOf
 
 class MainVerticle : AbstractVerticle() {
 
   override fun start() {
-    val graphQlConfiguration = GraphQlConfiguration(vertx)
-    val graphQlHandler = GraphQLHandler.create(graphQlConfiguration.setupGraphQl(TaskServiceImpl()))
-    val graphiQLHandlerOptions: GraphiQLHandlerOptions = graphiQLHandlerOptionsOf(
-      enabled = true,
-      graphQLUri = "/graphql"
-    )
-    val router = Router.router(vertx)
+    val graphQlHandler: GraphQLHandler =
+      GraphQLHandler.create(
+        setupGraphQlSchemaAndWiring(
+          vertx,
+          TaskFacade(TaskServiceImpl(InMemoryTaskRepository())) // Dependency injection at its finest :)
+        )
+      )
 
-    router.route().handler(BodyHandler.create())
-    router.route("/graphql").handler(graphQlHandler)
-    router.route("/graphiql/*").handler(GraphiQLHandler.create(graphiQLHandlerOptions))
+    val graphiQlHandler: GraphiQLHandler = GraphiQLHandler.create(
+      graphiQLHandlerOptionsOf(
+        enabled = true,
+        graphQLUri = "/graphql"
+      )
+    )
 
     vertx.createHttpServer()
-      .requestHandler(router)
+      .requestHandler(applicationRouter(vertx, graphQlHandler, graphiQlHandler))
       .listen(8080)
   }
 }
