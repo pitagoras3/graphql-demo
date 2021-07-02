@@ -2,6 +2,9 @@ package dev.marcinkiewicz.graphql
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import dev.marcinkiewicz.graphql.TestMainVerticle.TestMessage.ALL_TASKS_QUERY
+import dev.marcinkiewicz.graphql.TestMainVerticle.TestMessage.INIT_WS_CONNECTION
+import dev.marcinkiewicz.graphql.TestMainVerticle.TestMessage.WS_QUERY
 import io.reactiverse.junit5.web.TestRequest.*
 import io.reactiverse.junit5.web.WebClientOptionsInject
 import io.vertx.core.Vertx
@@ -30,7 +33,7 @@ class TestMainVerticle {
   }
 
   @Test
-  fun `should return 10 tasks when starting application`(testContext: VertxTestContext, client: WebClient) {
+  fun `should return 10 tasks through http`(testContext: VertxTestContext, client: WebClient) {
     testRequest(client, HttpMethod.POST, "/graphql")
       .expect(
         statusCode(200), {
@@ -41,11 +44,48 @@ class TestMainVerticle {
               .size()
           ).isEqualTo(10)
         })
-      .sendJson(JsonObject("""{"query":"query {allTasks{id,description,completed}}"}"""), testContext)
+      .sendJson(JsonObject(ALL_TASKS_QUERY), testContext)
   }
 
   @Test
-  fun verticleDeployed(vertx: Vertx, testContext: VertxTestContext) {
+  fun `should open websocket connection`(vertx: Vertx, testContext: VertxTestContext) {
+    val client = vertx.createHttpClient()
+    testContext.assertComplete(client.webSocket(8080, "localhost", "/graphql-ws"))
+      .onComplete { testContext.completeNow() }
+  }
+
+  @Test
+  fun `should return 10 tasks through webSocket`(vertx: Vertx, testContext: VertxTestContext) {
+    val client = vertx.createHttpClient()
+    client.webSocket(8080, "localhost", "/graphql-ws") {
+      val ws = it.result()
+      ws.write(JsonObject(INIT_WS_CONNECTION).toBuffer()).onComplete {
+        ws.write(JsonObject(WS_QUERY).toBuffer())
+      }
+      ws.handler { buffer ->
+        val wsResponse = buffer.toJsonObject()
+        if (wsResponse.getString("id") == "1" && wsResponse.getString("type") == "data") {
+          assertThat(
+            wsResponse
+              .getJsonObject("payload")
+              .getJsonObject("data")
+              .getJsonArray("allTasks")
+              .size()
+          ).isEqualTo(10)
+          testContext.completeNow()
+        }
+      }
+    }
+  }
+
+  @Test
+  fun verticleDeployed(testContext: VertxTestContext) {
     testContext.completeNow()
+  }
+
+  private object TestMessage {
+    const val ALL_TASKS_QUERY = """{"query":"query {allTasks{id,description,completed}}"}"""
+    const val INIT_WS_CONNECTION = """{"id": "0","type": "connection_init"}"""
+    const val WS_QUERY = """{"id": "1","type": "start","payload": $ALL_TASKS_QUERY}"""
   }
 }
